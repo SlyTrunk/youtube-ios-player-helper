@@ -591,6 +591,11 @@ NSString static *const kYTPlayerEmbedUrlRegexPattern = @"^http(s)://(www.)youtub
   }
 }
 
+-(void)webViewDidFinishLoad:(UIWebView *)webView
+{
+    webView.mediaPlaybackRequiresUserAction = NO;
+}
+
 
 /**
  * Private helper method to load an iframe player with the given player parameters.
@@ -609,8 +614,8 @@ NSString static *const kYTPlayerEmbedUrlRegexPattern = @"^http(s)://(www.)youtub
   };
   NSMutableDictionary *playerParams = [[NSMutableDictionary alloc] init];
   [playerParams addEntriesFromDictionary:additionalPlayerParams];
-  [playerParams setValue:@"100%" forKey:@"height"];
-  [playerParams setValue:@"100%" forKey:@"width"];
+  [playerParams setValue:[NSString stringWithFormat: @"%0.00f", self.frame.size.height] forKey:@"height"];
+  [playerParams setValue:[NSString stringWithFormat: @"%0.00f", self.frame.size.width] forKey:@"width"];
   [playerParams setValue:playerCallbacks forKey:@"events"];
 
   // This must not be empty so we can render a '{}' in the output JSON
@@ -624,9 +629,11 @@ NSString static *const kYTPlayerEmbedUrlRegexPattern = @"^http(s)://(www.)youtub
   [self addSubview:self.webView];
 
   NSError *error = nil;
-  NSString *path = [[NSBundle mainBundle] pathForResource:@"YTPlayerView-iframe-player"
-                                                   ofType:@"html"
-                                              inDirectory:@"Assets"];
+  NSString *path = [[NSBundle mainBundle] pathForResource:@"YTPlayerView-iframe-player" ofType:@"html"];
+
+//  NSString *path = [[NSBundle mainBundle] pathForResource:@"YTPlayerView-iframe-player"
+//                                                   ofType:@"html"
+//                                              inDirectory:@"Assets"];
   NSString *embedHTMLTemplate =
       [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&error];
 
@@ -653,8 +660,8 @@ NSString static *const kYTPlayerEmbedUrlRegexPattern = @"^http(s)://(www.)youtub
   NSString *embedHTML = [NSString stringWithFormat:embedHTMLTemplate, playerVarsJsonString];
   [self.webView loadHTMLString:embedHTML baseURL:[NSURL URLWithString:@"about:blank"]];
   [self.webView setDelegate:self];
-  self.webView.allowsInlineMediaPlayback = YES;
-  self.webView.mediaPlaybackRequiresUserAction = NO;
+//  self.webView.allowsInlineMediaPlayback = YES;
+//  self.webView.mediaPlaybackRequiresUserAction = NO;
   return YES;
 }
 
@@ -750,6 +757,13 @@ NSString static *const kYTPlayerEmbedUrlRegexPattern = @"^http(s)://(www.)youtub
   webView.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
   webView.scrollView.scrollEnabled = NO;
   webView.scrollView.bounces = NO;
+  webView.allowsInlineMediaPlayback=YES;
+  webView.mediaPlaybackRequiresUserAction=NO;
+    
+  webView.backgroundColor = [UIColor clearColor];
+  webView.opaque = NO;
+  [webView setClipsToBounds:YES];
+    
   return webView;
 }
 
